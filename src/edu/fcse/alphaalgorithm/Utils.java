@@ -30,6 +30,7 @@ public class Utils {
 		}
 		return sets;
 	}
+
 	public static Set<Trace> readInputFromCSV(String fileName) {
 		Charset charset = Charset.forName("US-ASCII");
 		Path file = FileSystems.getDefault().getPath(fileName);
@@ -50,12 +51,28 @@ public class Utils {
 		}
 		return toReturn;
 	}
-	public static Set<Trace> demoL1eventLog(){
+
+	public static Set<Trace> demoL1eventLog() {
 		Set<Trace> eventLog = new HashSet<Trace>();
 		eventLog.add(new Trace(new String[] { "a", "b", "c", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "c", "b", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "e", "d" }));
 		return eventLog;
 	}
-	
+
+	public static Set<Trace> demoL2eventLog() {
+		Set<Trace> eventLog = new HashSet<Trace>();
+		eventLog.add(new Trace(new String[] { "a", "b", "c", "d" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "b", "d" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "c", "e", "f", "b",
+				"c", "d" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "c", "e", "f", "c",
+				"b", "d" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "b", "e", "f", "b",
+				"c", "d" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "b", "e", "f", "b",
+				"c", "e", "f", "c", "b", "d" }));
+		return eventLog;
+	}
+
 }
