@@ -24,7 +24,7 @@ public class Place {
 
 	@Override
 	public String toString() {
-		String toReturn =name+": "+eventsPair+"\n";
+		String toReturn =name+": "+eventsPair;
 		return toReturn;
 	}
 

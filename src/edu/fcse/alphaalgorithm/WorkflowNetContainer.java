@@ -32,14 +32,12 @@ public class WorkflowNetContainer {
 		// Steps 1,2,3
 		extractEvents(eventsLog, this.eventsList, this.startingEvents,
 				this.endingEvents);
-
-		System.out.println("Events in workflow net:" + eventsList);
 		// Generate footprint matrix from eventsLog
 		footprint = new Footprint(eventsList, eventsLog);
 		System.out.println("------------------------");
 		System.out.println("Footprint matrix:");
 		System.out.println(footprint);
-
+		System.out.println("------------------------");
 		// Step 4
 		Set<Place> XL = getPlacesFromFootprint();
 		// Step 5
@@ -50,13 +48,8 @@ public class WorkflowNetContainer {
 		createEventToPlaceTransitions();
 		createPlaceToEventTransitions();
 		// Step 6
-//		workflowPlaces.add(in);
-//		workflowPlaces.add(out);
 		connectSourceAndSink();
-
-		System.out.println("Workflow net places:");
-		System.out.println(workflowPlaces);
-		System.out.println(in+""+out);
+		System.out.println(prepareWFforPrint());
 	}
 
 	/**
@@ -174,5 +167,34 @@ public class WorkflowNetContainer {
 			out.addInEvent(endEvent);
 			eventToPlaceTransitions.add(new Pair<String, Place>(endEvent, out));
 		}
+	}
+
+	private String prepareWFforPrint() {
+		StringBuilder sb = new StringBuilder(
+				40
+						* (placeToEventTransitions.size() + eventToPlaceTransitions
+								.size()) + eventsList.size() + 15
+						* workflowPlaces.size());
+		sb.append("Events:\n");
+		for (String event : eventsList) {
+			sb.append(event + ", ");
+		}
+		sb.append("\nPlaces:\n");
+		sb.append(in).append("\n");
+		for (Place place : workflowPlaces) {
+			sb.append(place).append("\n");
+		}
+		sb.append(out);
+		sb.append("\n");
+		sb.append("Transitions:\n");
+		for (Pair<Place, String> transition : placeToEventTransitions) {
+			sb.append(String.format("From place (%s) to event [%s]\n",
+					transition.getFirst(), transition.getSecond()));
+		}
+		for (Pair<String, Place> transition : eventToPlaceTransitions) {
+			sb.append(String.format("From event [%s] to place (%s)\n",
+					transition.getFirst(), transition.getSecond()));
+		}
+		return sb.toString();
 	}
 }
