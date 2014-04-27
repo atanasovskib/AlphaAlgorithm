@@ -3,23 +3,29 @@ package edu.fcse.alphaalgorithm;
 import java.util.Set;
 
 public class Place {
-	Pair<Set<String>, Set<String>> placePair;
-
+	Pair<Set<String>, Set<String>> eventsPair;
+	String name;
+	private static char nameGenerator='A';
 	public Place(Set<String> in, Set<String> out) {
-		placePair = new Pair<>(in, out);
+		eventsPair = new Pair<>(in, out);
+		name=""+nameGenerator++;
+	}
+	public Place(String name,Set<String> in,Set<String> out){
+		eventsPair=new Pair<>(in, out);
+		this.name=name;
+	}
+	public Set<String> getInEvents() {
+		return eventsPair.getFirst();
 	}
 
-	public Set<String> getInPlaces() {
-		return placePair.getFirst();
-	}
-
-	public Set<String> getOutPlaces() {
-		return placePair.getSecond();
+	public Set<String> getOutEvents() {
+		return eventsPair.getSecond();
 	}
 
 	@Override
 	public String toString() {
-		return placePair.toString();
+		String toReturn =name+": "+eventsPair+"\n";
+		return toReturn;
 	}
 
 	@Override
@@ -27,7 +33,7 @@ public class Place {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((placePair == null) ? 0 : placePair.hashCode());
+				+ ((eventsPair == null) ? 0 : eventsPair.hashCode());
 		return result;
 	}
 
@@ -40,20 +46,26 @@ public class Place {
 		if (getClass() != obj.getClass())
 			return false;
 		Place other = (Place) obj;
-		if (placePair == null) {
-			if (other.placePair != null)
+		if (eventsPair == null) {
+			if (other.eventsPair != null)
 				return false;
-		} else if (!placePair.equals(other.placePair))
+		} else if (!eventsPair.equals(other.eventsPair))
 			return false;
 		return true;
 	}
 
 	public boolean isSuperPlace(Place potentialSubplace) {
-		if (getInPlaces().containsAll(potentialSubplace.getInPlaces())) {
-			if (getOutPlaces().containsAll(potentialSubplace.getOutPlaces())) {
+		if (getInEvents().containsAll(potentialSubplace.getInEvents())) {
+			if (getOutEvents().containsAll(potentialSubplace.getOutEvents())) {
 				return true;
 			}
 		}
 		return false;
+	}
+	public void addInEvent(String eventName){
+		eventsPair.getFirst().add(eventName);
+	}
+	public void addOutEvent(String eventName){
+		eventsPair.getSecond().add(eventName);
 	}
 }

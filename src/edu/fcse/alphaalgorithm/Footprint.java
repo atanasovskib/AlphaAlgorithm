@@ -102,8 +102,17 @@ public class Footprint {
 
 	@Override
 	public String toString() {
-		String toReturn = "";
+		String toReturn = "  ";
+		String[] tmp = new String[footprint.length];
+		for (String key : eventNameToMatrixIndex.keySet()) {
+			tmp[eventNameToMatrixIndex.get(key)] = key;
+		}
 		for (int i = 0; i < footprint.length; i++) {
+			toReturn += tmp[i] + " ";
+		}
+		toReturn += "\n";
+		for (int i = 0; i < footprint.length; i++) {
+			toReturn += tmp[i] + " ";
 			for (int j = 0; j < footprint.length; j++) {
 				toReturn += footprint[i][j].symbol() + " ";
 			}

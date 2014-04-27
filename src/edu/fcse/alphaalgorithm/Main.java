@@ -8,10 +8,6 @@ public class Main {
 //		Set<Trace> eventLog = Utils.readInputFromCSV(fileName);
 		Set<Trace> eventLog = Utils.demoL1eventLog();
 		WorkflowNetContainer wfContainer = new WorkflowNetContainer(eventLog);
-		System.out.println("--------");
-		for (Place p : wfContainer.getWorkflowPlaces()) {
-			System.out.println(p);
-		}
 	}
 	
 }
