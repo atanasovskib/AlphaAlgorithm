@@ -7,7 +7,7 @@ public class Main {
 //		String fileName = "input";
 //		Set<Trace> eventLog = Utils.readInputFromCSV(fileName);
 		Set<Trace> eventLog = Utils.demoL2eventLog();
-		WorkflowNetContainer wfContainer = new WorkflowNetContainer(eventLog);
+		WorkflowNetCreator wfContainer = new WorkflowNetCreator(eventLog);
 	}
 	
 }

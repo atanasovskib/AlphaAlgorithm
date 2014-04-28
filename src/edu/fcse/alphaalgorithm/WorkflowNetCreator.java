@@ -4,10 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Creates a Workflow Net Model from an eventLog.
  * @author blagoj atanasovski
  * 
  */
-public class WorkflowNetContainer {
+/**
+ * @author blagoj
+ * 
+ */
+public class WorkflowNetCreator {
 	Footprint footprint;
 	Set<Trace> eventsLog;
 	Set<String> eventsList;// Xl
@@ -23,7 +28,7 @@ public class WorkflowNetContainer {
 	// Sink place
 	Place out = new Place("out", new HashSet<String>(), new HashSet<String>());
 
-	public WorkflowNetContainer(Set<Trace> eventsLog) {
+	public WorkflowNetCreator(Set<Trace> eventsLog) {
 		this.eventsLog = eventsLog;
 		this.eventsList = new HashSet<>();
 		this.startingEvents = new HashSet<>();
@@ -38,13 +43,13 @@ public class WorkflowNetContainer {
 		System.out.println("Footprint matrix:");
 		System.out.println(footprint);
 		System.out.println("------------------------");
-		// Step 4
+	// Step 4 generate places
 		Set<Place> XL = getPlacesFromFootprint();
-		// Step 5
+	// Step 5 reduce places, no places that are subsets of other places
 		Set<Place> YL = reducePlaces(XL);
 		// all the places except start and sink
 		workflowPlaces = YL;
-		// Step 7
+	// Step 7 create transitions
 		createEventToPlaceTransitions();
 		createPlaceToEventTransitions();
 		// Step 6
@@ -76,12 +81,11 @@ public class WorkflowNetContainer {
 		}
 	}
 
-	/**
-	 * 
-	 * @return XL, a set of places, each place has input and output events, this
-	 *         set can be reduced to YL by the method
-	 *         WorkflowNetContainer.reducePlaces
-	 */
+	    /**
+     * 
+     * @return XL, a set of places, each place has input and output events, this
+     *         set can be reduced to YL by the method {@link #reducePlaces(Set)}
+     */
 	private Set<Place> getPlacesFromFootprint() {
 		Set<Place> xl = new HashSet<>();
 		Set<Set<String>> powerSet = Utils.powerSet(eventsList);
@@ -103,6 +107,12 @@ public class WorkflowNetContainer {
 		return xl;
 	}
 
+    /**
+     * @param Xl
+     *            the result from step 4 of the algorithm
+     * @return Yl the result from step 5 of the algorithm, all subset Places
+     *         removed from Xl
+     */
 	private Set<Place> reducePlaces(Set<Place> xl) {
 		Set<Place> toRemove = new HashSet<Place>();
 		Place[] potentialPlaces = xl.toArray(new Place[] {});
@@ -157,6 +167,10 @@ public class WorkflowNetContainer {
 		}
 	}
 
+    /**
+     * Source and Sink places are not connected after the transitions are
+     * created between the other events.
+     */
 	private void connectSourceAndSink() {
 		for (String startEvent : startingEvents) {
 			in.addOutEvent(startEvent);

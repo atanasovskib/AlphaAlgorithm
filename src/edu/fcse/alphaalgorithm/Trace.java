@@ -6,6 +6,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * A wrapper class for a list of events. Each event is represented by it's name.
+ * 
+ * @author blagoj atanasovski
+ * 
+ */
 public class Trace implements Iterable<String>{
 	private List<String> eventsList;
 	public Trace(){
@@ -20,12 +26,11 @@ public class Trace implements Iterable<String>{
 	public Trace(Collection<String> events){
 		eventsList=new ArrayList<>(events);
 	}
+	
 	public void addEvent(String eventName){
 		eventsList.add(eventName);
 	}
-	public String getEventAt(int position){
-		return eventsList.get(position);
-	}
+
 	@Override
 	public Iterator<String> iterator() {
 		return eventsList.iterator();

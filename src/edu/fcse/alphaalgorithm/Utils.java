@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Set;
 
 public class Utils {
+    /**
+     * @param originalSet
+     * @return a set of all the subsets of originalSet
+     */
 	public static <E> Set<Set<E>> powerSet(Set<E> originalSet) {
 		Set<Set<E>> sets = new HashSet<Set<E>>();
 		if (originalSet.isEmpty()) {
