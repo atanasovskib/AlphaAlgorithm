@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Set;
 
 public class Utils {
-    /**
-     * @param originalSet
-     * @return a set of all the subsets of originalSet
-     */
+	/**
+	 * @param originalSet
+	 * @return a set of all the subsets of originalSet
+	 */
 	public static <E> Set<Set<E>> powerSet(Set<E> originalSet) {
 		Set<Set<E>> sets = new HashSet<Set<E>>();
 		if (originalSet.isEmpty()) {
@@ -79,4 +79,64 @@ public class Utils {
 		return eventLog;
 	}
 
+	public static Set<Trace> demoL7eventLog() {
+		Set<Trace> eventLog = new HashSet<Trace>();
+		eventLog.add(new Trace(new String[] { "a", "c" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "c" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "b", "c" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "b", "b", "c" }));
+		return eventLog;
+	}
+
+	public static Set<Trace> demoLLTeventLog() {
+		Set<Trace> eventLog = new HashSet<Trace>();
+		eventLog.add(new Trace(new String[] { "x", "a", "y" }));
+		eventLog.add(new Trace(new String[] { "x", "a", "b", "y" }));
+		eventLog.add(new Trace(new String[] { "x", "w", }));
+		eventLog.add(new Trace(new String[] { "z", "b", "w" }));
+		eventLog.add(new Trace(new String[] { "z", "b", "a", "y" }));
+		eventLog.add(new Trace(new String[] { "z", "y" }));
+		eventLog.add(new Trace(new String[] { "z", "a", "b", "a", "y" }));
+
+		return eventLog;
+	}
+
+	public static Set<Trace> chapter7EventLog() {
+		Set<Trace> eventLog = new HashSet<>();
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "d", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "b", "d", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "b", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "f", "d",
+				"b", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "b", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "f", "b",
+				"d", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "f", "b",
+				"d", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "f", "d",
+				"b", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "c",
+				"d", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "d",
+				"b", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "b",
+				"d", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "c", "d", "e", "f", "b",
+				"d", "e", "f", "d", "b", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "d",
+				"b", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "b",
+				"d", "e", "f", "b", "d", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "d",
+				"b", "e", "f", "b", "d", "e", "h" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "b", "e", "f", "b",
+				"d", "e", "f", "d", "b", "e", "g" }));
+		eventLog.add(new Trace(new String[] { "a", "d", "c", "e", "f", "d",
+				"b", "e", "f", "c", "d", "e", "f", "d", "b", "e", "g" }));
+		return eventLog;
+	}
 }

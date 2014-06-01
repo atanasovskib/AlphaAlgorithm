@@ -1,6 +1,11 @@
 package edu.fcse.alphaalgorithm;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -13,6 +18,10 @@ import java.util.Set;
  * 
  */
 public class WorkflowNetCreator {
+	public static boolean takeInAccountLoopsLengthTwo=true;
+
+	public Set<LoopLengthOne> recordedLLOs;
+
 	Footprint footprint;
 	Set<Trace> eventsLog;
 	Set<String> eventsList;// Xl
@@ -29,7 +38,11 @@ public class WorkflowNetCreator {
 	Place out = new Place("out", new HashSet<String>(), new HashSet<String>());
 
 	public WorkflowNetCreator(Set<Trace> eventsLog) {
-		this.eventsLog = eventsLog;
+		Set<Trace> preprocessedEventsLog = new HashSet<>();
+		for (Trace trace : eventsLog) {
+			preprocessedEventsLog.add(preprocessOLLs(trace));
+		}
+		this.eventsLog = preprocessedEventsLog;
 		this.eventsList = new HashSet<>();
 		this.startingEvents = new HashSet<>();
 		this.endingEvents = new HashSet<>();
@@ -38,18 +51,19 @@ public class WorkflowNetCreator {
 		extractEvents(eventsLog, this.eventsList, this.startingEvents,
 				this.endingEvents);
 		// Generate footprint matrix from eventsLog
-		footprint = new Footprint(eventsList, eventsLog);
+		footprint = new Footprint(eventsList, eventsLog, takeInAccountLoopsLengthTwo);
 		System.out.println("------------------------");
 		System.out.println("Footprint matrix:");
 		System.out.println(footprint);
 		System.out.println("------------------------");
-	// Step 4 generate places
+		// Step 4 generate places
 		Set<Place> XL = getPlacesFromFootprint();
-	// Step 5 reduce places, no places that are subsets of other places
+		// Step 5 reduce places, no places that are subsets of other places
 		Set<Place> YL = reducePlaces(XL);
 		// all the places except start and sink
 		workflowPlaces = YL;
-	// Step 7 create transitions
+		// Step 7 create transitions
+		postProcessWF();
 		createEventToPlaceTransitions();
 		createPlaceToEventTransitions();
 		// Step 6
@@ -81,11 +95,11 @@ public class WorkflowNetCreator {
 		}
 	}
 
-	    /**
-     * 
-     * @return XL, a set of places, each place has input and output events, this
-     *         set can be reduced to YL by the method {@link #reducePlaces(Set)}
-     */
+	/**
+	 * 
+	 * @return XL, a set of places, each place has input and output events, this
+	 *         set can be reduced to YL by the method {@link #reducePlaces(Set)}
+	 */
 	private Set<Place> getPlacesFromFootprint() {
 		Set<Place> xl = new HashSet<>();
 		Set<Set<String>> powerSet = Utils.powerSet(eventsList);
@@ -107,12 +121,12 @@ public class WorkflowNetCreator {
 		return xl;
 	}
 
-    /**
-     * @param Xl
-     *            the result from step 4 of the algorithm
-     * @return Yl the result from step 5 of the algorithm, all subset Places
-     *         removed from Xl
-     */
+	/**
+	 * @param Xl
+	 *            the result from step 4 of the algorithm
+	 * @return Yl the result from step 5 of the algorithm, all subset Places
+	 *         removed from Xl
+	 */
 	private Set<Place> reducePlaces(Set<Place> xl) {
 		Set<Place> toRemove = new HashSet<Place>();
 		Place[] potentialPlaces = xl.toArray(new Place[] {});
@@ -167,10 +181,10 @@ public class WorkflowNetCreator {
 		}
 	}
 
-    /**
-     * Source and Sink places are not connected after the transitions are
-     * created between the other events.
-     */
+	/**
+	 * Source and Sink places are not connected after the transitions are
+	 * created between the other events.
+	 */
 	private void connectSourceAndSink() {
 		for (String startEvent : startingEvents) {
 			in.addOutEvent(startEvent);
@@ -211,4 +225,87 @@ public class WorkflowNetCreator {
 		}
 		return sb.toString();
 	}
+
+	private int checkForCycleLengthOne(Trace singleTrace) {
+		List<String> events = singleTrace.getEventsList();
+		for (int i = 0; i < events.size() - 1; i++) {
+			if (events.get(i).equals(events.get(i + 1))) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private Trace preprocessOLLs(Trace singleTrace) {
+		if (recordedLLOs == null) {
+			recordedLLOs = new HashSet<>();
+		}
+		int start = -1;
+		if ((start = checkForCycleLengthOne(singleTrace)) != -1) {
+			List<String> eventsList = singleTrace.getEventsList();
+			int prev = start - 1;
+			int i = start;
+			for (; i < eventsList.size() - 1
+					&& eventsList.get(i).equals(eventsList.get(i + 1)); i++)
+				;
+			i++;
+			LoopLengthOne llo = new LoopLengthOne(eventsList.get(prev),
+					eventsList.get(start), eventsList.get(i));
+			recordedLLOs.add(llo);
+		}
+		return singleTrace;
+	}
+	private Trace pruneOLLSBackup(Trace singleTrace) {
+		if (recordedLLOs == null) {
+			recordedLLOs = new HashSet<>();
+		}
+		Trace newTrace;
+		int start = -1;
+		while ((start = checkForCycleLengthOne(singleTrace)) != -1) {
+
+			newTrace = new Trace();
+			List<String> eventsList = singleTrace.getEventsList();
+			int prev = start - 1;
+			int i = 0;
+			for (; i < start; i++) {
+				newTrace.addEvent(eventsList.get(i));
+			}
+			for (; i < eventsList.size() - 1
+					&& eventsList.get(i).equals(eventsList.get(i + 1)); i++)
+				;
+			i++;
+			LoopLengthOne llo = new LoopLengthOne(eventsList.get(prev),
+					eventsList.get(start), eventsList.get(i));
+			recordedLLOs.add(llo);
+			for (; i < eventsList.size(); i++) {
+				newTrace.addEvent(eventsList.get(i));
+			}
+			singleTrace = newTrace;
+		}
+		return singleTrace;
+	}
+	private void postProcessWF() {
+		Queue<LoopLengthOne> lloQueue = new LinkedList<>(recordedLLOs);
+		while (!lloQueue.isEmpty()) {
+			LoopLengthOne llo = lloQueue.poll();
+			String in = llo.getPrevAction();
+			String out = llo.getNextAction();
+			boolean used = false;
+			for (Place place : workflowPlaces) {
+				if (place.getInEvents().contains(in)
+						&& place.getOutEvents().contains(out)) {
+					place.addInEvent(llo.getLoopedAction());
+					place.addOutEvent(llo.getLoopedAction());
+					eventsList.add(llo.getLoopedAction());
+					used = true;
+					//NOT SURE ABOUT THIS
+					break;
+				}
+			}
+			if (!used) {
+				lloQueue.add(llo);
+			}
+		}
+	}
+
 }

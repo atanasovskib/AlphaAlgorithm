@@ -56,4 +56,15 @@ public class Trace implements Iterable<String>{
 	public String getLastEvent() {
 		return eventsList.get(eventsList.size()-1);
 	}
+	@Override
+	public String toString() {
+		return "Trace [eventsList=" + eventsList + "]";
+	}
+	public void clear() {
+		eventsList.clear();
+	}
+	public int size() {
+		return eventsList.size();
+	}
+	
 }
