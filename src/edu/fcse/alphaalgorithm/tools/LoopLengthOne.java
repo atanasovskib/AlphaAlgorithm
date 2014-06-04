@@ -1,4 +1,4 @@
-package edu.fcse.alphaalgorithm;
+package edu.fcse.alphaalgorithm.tools;
 
 public class LoopLengthOne {
 	String prevAction;

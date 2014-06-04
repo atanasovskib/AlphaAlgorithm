@@ -1,12 +1,20 @@
 package edu.fcse.alphaalgorithm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
+import edu.fcse.alphaalgorithm.tools.Footprint;
+import edu.fcse.alphaalgorithm.tools.LoopLengthOne;
+import edu.fcse.alphaalgorithm.tools.Pair;
+import edu.fcse.alphaalgorithm.tools.Place;
+import edu.fcse.alphaalgorithm.tools.Trace;
 
 /**
  * Creates a Workflow Net Model from an eventLog.
@@ -29,8 +37,9 @@ public class WorkflowNetCreator {
 	Set<String> endingActivities;// Xo
 	Set<Place> workflowPlaces;// Pl
 	Set<Pair<String, Place>> eventToPlaceTransitions;
+	Map<String, Set<Place>> eventToPlaceTransitionsMap;
 	Set<Pair<Place, String>> placeToEventTransitions;
-
+	Map<Place,Set<String>> placeToEventTransitionsMap;
 	// Source place
 	Place in = new Place("in", new HashSet<String>(), new HashSet<String>());
 
@@ -308,8 +317,20 @@ public class WorkflowNetCreator {
 		}
 	}
 
-	public boolean runTrace(Trace t) {
+	public boolean runTrace(Trace trace) {
+		Place current=in;
+		boolean ok=true;
+		for(String activity:trace){
+			
+		}
+		visited=new HashMap<>();
 		return false;
 	}
-
+	private Map<String,Boolean> visited;
+	
+	private boolean rek(Place current){
+		visited.put(current.getName(),true);
+		
+		return false;
+	}
 }

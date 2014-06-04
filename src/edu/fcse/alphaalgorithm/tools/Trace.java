@@ -1,4 +1,4 @@
-package edu.fcse.alphaalgorithm;
+package edu.fcse.alphaalgorithm.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;

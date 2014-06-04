@@ -6,10 +6,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import edu.fcse.alphaalgorithm.tools.Trace;
+
 public class Validate {
 	private static Map<Integer, Trace> logMap;
 	private static int[] rangeMapper = new int[21];
-	private static int total = 1391;
+	private static final int TOTAL_CASES = 1391;
+	private static final int FOLDS = 5;
 
 	private static void createLog() {
 		int i = 0;
@@ -92,15 +95,17 @@ public class Validate {
 	}
 
 	private static Set<Trace>[] getFolds() {
-		Set<Trace>[] folds = new Set[5];
+		//Actually I checked, double checked
+		@SuppressWarnings("unchecked")
+		Set<Trace>[] folds = new Set[FOLDS];
 		Set<Integer> pickedCases = new HashSet<>();
 		Random r = new Random();
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < FOLDS; i++) {
 			folds[i] = new HashSet<>();
-			for (int j = 0; j < total / 5; j++) {
+			for (int j = 0; j < TOTAL_CASES / FOLDS; j++) {
 				int index = -1;
 				do {
-					index = r.nextInt(total);
+					index = r.nextInt(TOTAL_CASES);
 				} while (pickedCases.contains(index));
 				pickedCases.add(index);
 				int k = 0;
@@ -116,10 +121,10 @@ public class Validate {
 	public static void validateAlgorithm() {
 		createLog();
 		Set<Trace>[] folds = getFolds();
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < folds.length; i++) {
 			Set<Trace> validationSet = folds[i];
 			Set<Trace> constructionSet = new HashSet<Trace>();
-			for (int j = 0; j < 5; j++) {
+			for (int j = 0; j < folds.length; j++) {
 				if (j == i) {
 					continue;
 				}
@@ -127,12 +132,19 @@ public class Validate {
 			}
 			WorkflowNetCreator wfC = new WorkflowNetCreator(constructionSet);
 			boolean passes = true;
+			System.out.println("Fold: " + i);
+			System.out.println("Construction set count: "
+					+ constructionSet.size());
+			System.out.println("Validation set count: " + validationSet.size());
+			int fails = 0;
 			for (Trace t : validationSet) {
 				passes = wfC.runTrace(t);
 				if (!passes) {
-					break;
+					fails++;
 				}
-			}//kolku???
+			}
+			System.out.println("Failed validation traces: "+fails);
+			
 		}
 	}
 }

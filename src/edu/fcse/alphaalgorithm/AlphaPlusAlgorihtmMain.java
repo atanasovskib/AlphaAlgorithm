@@ -3,9 +3,11 @@ package edu.fcse.alphaalgorithm;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.fcse.alphaalgorithm.tools.Trace;
+
 public class AlphaPlusAlgorihtmMain {
 	public static void main(String args[]) {
-		Validate.validateAlgorithm();
+		//Validate.validateAlgorithm();
 		// Set<Trace> eventLog = checkArgs(args);
 		Set<Trace> eventLog = Utils.chapter7EventLog();
 		WorkflowNetCreator.takeInAccountLoopsLengthTwo = true;

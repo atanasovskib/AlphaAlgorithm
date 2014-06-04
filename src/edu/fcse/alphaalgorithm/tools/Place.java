@@ -1,4 +1,4 @@
-package edu.fcse.alphaalgorithm;
+package edu.fcse.alphaalgorithm.tools;
 
 import java.util.Set;
 
@@ -88,5 +88,8 @@ public class Place {
 
 	public void addOutEvent(String eventName) {
 		eventsPair.getSecond().add(eventName);
+	}
+	public String getName(){
+		return name;
 	}
 }
