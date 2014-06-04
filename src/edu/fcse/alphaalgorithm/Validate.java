@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import edu.fcse.alphaalgorithm.tools.Footprint;
+import edu.fcse.alphaalgorithm.tools.Place;
 import edu.fcse.alphaalgorithm.tools.Trace;
 
 public class Validate {
@@ -131,6 +133,7 @@ public class Validate {
 				constructionSet.addAll(folds[j]);
 			}
 			WorkflowNetCreator wfC = new WorkflowNetCreator(constructionSet);
+			Place.nameGenerator='A';
 			boolean passes = true;
 			System.out.println("Fold: " + i);
 			System.out.println("Construction set count: "

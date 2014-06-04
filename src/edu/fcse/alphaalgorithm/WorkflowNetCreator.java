@@ -335,6 +335,9 @@ public class WorkflowNetCreator {
 	boolean kraj = false;
 
 	private void executeTraceRecursively(Place currentPlace, int currentPos) {
+		//ГРЕШКААА
+		System.err.println("Curr place: "+currentPlace.getName());
+		System.err.println("Next trans: "+currentTrace.get(currentPos));
 		if (currentPos == currentTrace.size()) {
 			if (currentPlace.getName().equals(out.getName())) {
 				kraj = true;

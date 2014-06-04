@@ -7,11 +7,11 @@ import edu.fcse.alphaalgorithm.tools.Trace;
 
 public class AlphaPlusAlgorihtmMain {
 	public static void main(String args[]) {
-		//Validate.validateAlgorithm();
+		Validate.validateAlgorithm();
 		// Set<Trace> eventLog = checkArgs(args);
-		Set<Trace> eventLog = Utils.chapter7EventLog();
-		WorkflowNetCreator.takeInAccountLoopsLengthTwo = true;
-		new WorkflowNetCreator(eventLog);
+//		Set<Trace> eventLog = Utils.chapter7EventLog();
+//		WorkflowNetCreator.takeInAccountLoopsLengthTwo = true;
+//		new WorkflowNetCreator(eventLog);
 	}
 
 	private static Set<Trace> checkArgs(String[] args) {

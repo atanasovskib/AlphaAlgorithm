@@ -10,7 +10,7 @@ public class Place {
 	 * identification of the Place. See {@link #equals(Object)}
 	 */
 	String name;
-	private static char nameGenerator = 'A';
+	public static char nameGenerator = 'A';
 
 	public Place(Set<String> in, Set<String> out) {
 		activitiesPair = new Pair<>(in, out);
