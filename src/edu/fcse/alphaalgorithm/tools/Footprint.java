@@ -35,7 +35,7 @@ public class Footprint {
 		}
 		// And then God said, let there be a Trace
 		for (Trace singleTrace : eventLog) {
-			List<String> eventsList = singleTrace.getEventsList();
+			List<String> eventsList = singleTrace.getActivitiesList();
 			for (int i = 0; i < eventsList.size() - 1; i++) {
 				// currentEventNumber is followed by nextEventNumber in some
 				// trace
@@ -60,7 +60,7 @@ public class Footprint {
 		}
 		if (lookForLLTs) {
 			for (Trace singleTrace : eventLog) {
-				List<String> eventsList = singleTrace.getEventsList();
+				List<String> eventsList = singleTrace.getActivitiesList();
 				for (int i = 0; i < eventsList.size() - 2; i++) {
 					if (eventsList.get(i).equals(eventsList.get(i + 2))) {
 						int currentEventNumber = eventNameToMatrixIndex

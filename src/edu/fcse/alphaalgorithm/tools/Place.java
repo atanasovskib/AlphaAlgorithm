@@ -3,8 +3,8 @@ package edu.fcse.alphaalgorithm.tools;
 import java.util.Set;
 
 public class Place {
-	// (Input Events, Output Events)
-	Pair<Set<String>, Set<String>> eventsPair;
+	// (Input Activities, Output Activities)
+	Pair<Set<String>, Set<String>> activitiesPair;
 	/**
 	 * The name of the place is merely symbolic, plays no part in the
 	 * identification of the Place. See {@link #equals(Object)}
@@ -13,26 +13,26 @@ public class Place {
 	private static char nameGenerator = 'A';
 
 	public Place(Set<String> in, Set<String> out) {
-		eventsPair = new Pair<>(in, out);
+		activitiesPair = new Pair<>(in, out);
 		name = "" + nameGenerator++;
 	}
 
 	public Place(String name, Set<String> in, Set<String> out) {
-		eventsPair = new Pair<>(in, out);
+		activitiesPair = new Pair<>(in, out);
 		this.name = name;
 	}
 
-	public Set<String> getInEvents() {
-		return eventsPair.getFirst();
+	public Set<String> getInActivities() {
+		return activitiesPair.getFirst();
 	}
 
-	public Set<String> getOutEvents() {
-		return eventsPair.getSecond();
+	public Set<String> getOutActivities() {
+		return activitiesPair.getSecond();
 	}
 
 	@Override
 	public String toString() {
-		String toReturn = name + ": " + eventsPair;
+		String toReturn = name + ": " + activitiesPair;
 		return toReturn;
 	}
 
@@ -41,7 +41,7 @@ public class Place {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((eventsPair == null) ? 0 : eventsPair.hashCode());
+				+ ((activitiesPair == null) ? 0 : activitiesPair.hashCode());
 		return result;
 	}
 
@@ -54,10 +54,10 @@ public class Place {
 		if (getClass() != obj.getClass())
 			return false;
 		Place other = (Place) obj;
-		if (eventsPair == null) {
-			if (other.eventsPair != null)
+		if (activitiesPair == null) {
+			if (other.activitiesPair != null)
 				return false;
-		} else if (!eventsPair.equals(other.eventsPair))
+		} else if (!activitiesPair.equals(other.activitiesPair))
 			return false;
 		return true;
 	}
@@ -74,20 +74,20 @@ public class Place {
 	 *         potentialSubplace.outEvents ⊆ this.outEvents
 	 */
 	public boolean isSuperPlace(Place potentialSubplace) {
-		if (getInEvents().containsAll(potentialSubplace.getInEvents())) {
-			if (getOutEvents().containsAll(potentialSubplace.getOutEvents())) {
+		if (getInActivities().containsAll(potentialSubplace.getInActivities())) {
+			if (getOutActivities().containsAll(potentialSubplace.getOutActivities())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public void addInEvent(String eventName) {
-		eventsPair.getFirst().add(eventName);
+	public void addInEvent(String activityName) {
+		activitiesPair.getFirst().add(activityName);
 	}
 
-	public void addOutEvent(String eventName) {
-		eventsPair.getSecond().add(eventName);
+	public void addOutEvent(String activityName) {
+		activitiesPair.getSecond().add(activityName);
 	}
 	public String getName(){
 		return name;

@@ -26,7 +26,7 @@ import edu.fcse.alphaalgorithm.tools.Trace;
  * 
  */
 public class WorkflowNetCreator {
-	public static boolean takeInAccountLoopsLengthTwo=true;
+	public static boolean takeInAccountLoopsLengthTwo = true;
 
 	public Set<LoopLengthOne> recordedLLOs;
 
@@ -39,7 +39,6 @@ public class WorkflowNetCreator {
 	Set<Pair<String, Place>> eventToPlaceTransitions;
 	Map<String, Set<Place>> eventToPlaceTransitionsMap;
 	Set<Pair<Place, String>> placeToEventTransitions;
-	Map<Place,Set<String>> placeToEventTransitionsMap;
 	// Source place
 	Place in = new Place("in", new HashSet<String>(), new HashSet<String>());
 
@@ -57,10 +56,11 @@ public class WorkflowNetCreator {
 		this.endingActivities = new HashSet<>();
 		// ProcessMining book page 133
 		// Steps 1,2,3
-		extractActivities(eventsLog, this.activityList, this.startingActivities,
-				this.endingActivities);
+		extractActivities(eventsLog, this.activityList,
+				this.startingActivities, this.endingActivities);
 		// Generate footprint matrix from eventsLog
-		footprint = new Footprint(activityList, eventsLog, takeInAccountLoopsLengthTwo);
+		footprint = new Footprint(activityList, eventsLog,
+				takeInAccountLoopsLengthTwo);
 		System.out.println("------------------------");
 		System.out.println("Footprint matrix:");
 		System.out.println(footprint);
@@ -100,7 +100,7 @@ public class WorkflowNetCreator {
 		for (Trace singleTrace : eventLog) {
 			startingEvents.add(singleTrace.getFirstEvent());
 			endingEvents.add(singleTrace.getLastEvent());
-			allEvents.addAll(singleTrace.getEventsList());
+			allEvents.addAll(singleTrace.getActivitiesList());
 		}
 	}
 
@@ -142,18 +142,18 @@ public class WorkflowNetCreator {
 		for (int i = 0; i < potentialPlaces.length - 1; i++) {
 			Place potentialPlace1 = potentialPlaces[i];
 			for (int j = i + 1; j < potentialPlaces.length; j++) {
-				if (potentialPlace1.getInEvents().containsAll(
-						potentialPlaces[j].getInEvents())) {
-					if (potentialPlaces[i].getOutEvents().containsAll(
-							potentialPlaces[j].getOutEvents())) {
+				if (potentialPlace1.getInActivities().containsAll(
+						potentialPlaces[j].getInActivities())) {
+					if (potentialPlaces[i].getOutActivities().containsAll(
+							potentialPlaces[j].getOutActivities())) {
 						toRemove.add(potentialPlaces[j]);
 						continue;
 					}
 				}
-				if (potentialPlaces[j].getInEvents().containsAll(
-						potentialPlaces[i].getInEvents())) {
-					if (potentialPlaces[j].getOutEvents().containsAll(
-							potentialPlaces[i].getOutEvents())) {
+				if (potentialPlaces[j].getInActivities().containsAll(
+						potentialPlaces[i].getInActivities())) {
+					if (potentialPlaces[j].getOutActivities().containsAll(
+							potentialPlaces[i].getOutActivities())) {
 						toRemove.add(potentialPlaces[i]);
 					}
 				}
@@ -169,11 +169,15 @@ public class WorkflowNetCreator {
 	}
 
 	public void createEventToPlaceTransitions() {
-		eventToPlaceTransitions = new HashSet<Pair<String, Place>>();
+		eventToPlaceTransitions = new HashSet<>();
+		eventToPlaceTransitionsMap=new HashMap<>();
 		for (String event : activityList) {
+			Set<Place> eventToPlace=new HashSet<>();
+			eventToPlaceTransitionsMap.put(event,eventToPlace);
 			for (Place place : this.workflowPlaces) {
-				if (place.getInEvents().contains(event)) {
+				if (place.getInActivities().contains(event)) {
 					eventToPlaceTransitions.add(new Pair<>(event, place));
+					eventToPlace.add(place);
 				}
 			}
 		}
@@ -183,7 +187,7 @@ public class WorkflowNetCreator {
 		placeToEventTransitions = new HashSet<>();
 		for (String event : activityList) {
 			for (Place place : this.workflowPlaces) {
-				if (place.getOutEvents().contains(event)) {
+				if (place.getOutActivities().contains(event)) {
 					placeToEventTransitions.add(new Pair<>(place, event));
 				}
 			}
@@ -236,7 +240,7 @@ public class WorkflowNetCreator {
 	}
 
 	private int checkForCycleLengthOne(Trace singleTrace) {
-		List<String> events = singleTrace.getEventsList();
+		List<String> events = singleTrace.getActivitiesList();
 		for (int i = 0; i < events.size() - 1; i++) {
 			if (events.get(i).equals(events.get(i + 1))) {
 				return i;
@@ -251,7 +255,7 @@ public class WorkflowNetCreator {
 		}
 		int start = -1;
 		if ((start = checkForCycleLengthOne(singleTrace)) != -1) {
-			List<String> eventsList = singleTrace.getEventsList();
+			List<String> eventsList = singleTrace.getActivitiesList();
 			int prev = start - 1;
 			int i = start;
 			for (; i < eventsList.size() - 1
@@ -264,6 +268,7 @@ public class WorkflowNetCreator {
 		}
 		return singleTrace;
 	}
+/*
 	private Trace pruneOLLSBackup(Trace singleTrace) {
 		if (recordedLLOs == null) {
 			recordedLLOs = new HashSet<>();
@@ -293,6 +298,7 @@ public class WorkflowNetCreator {
 		}
 		return singleTrace;
 	}
+*/
 	private void postProcessWF() {
 		Queue<LoopLengthOne> lloQueue = new LinkedList<>(recordedLLOs);
 		while (!lloQueue.isEmpty()) {
@@ -301,13 +307,13 @@ public class WorkflowNetCreator {
 			String out = llo.getNextAction();
 			boolean used = false;
 			for (Place place : workflowPlaces) {
-				if (place.getInEvents().contains(in)
-						&& place.getOutEvents().contains(out)) {
+				if (place.getInActivities().contains(in)
+						&& place.getOutActivities().contains(out)) {
 					place.addInEvent(llo.getLoopedAction());
 					place.addOutEvent(llo.getLoopedAction());
 					activityList.add(llo.getLoopedAction());
 					used = true;
-					//NOT SURE ABOUT THIS
+					// NOT SURE ABOUT THIS
 					break;
 				}
 			}
@@ -318,19 +324,35 @@ public class WorkflowNetCreator {
 	}
 
 	public boolean runTrace(Trace trace) {
-		Place current=in;
-		boolean ok=true;
-		for(String activity:trace){
-			
-		}
-		visited=new HashMap<>();
-		return false;
+		Place current = in;
+		currentTrace = trace.getActivitiesList();
+		kraj = false;
+		executeTraceRecursively(current, 0);
+		return kraj;
 	}
-	private Map<String,Boolean> visited;
-	
-	private boolean rek(Place current){
-		visited.put(current.getName(),true);
-		
-		return false;
+
+	private List<String> currentTrace;
+	boolean kraj = false;
+
+	private void executeTraceRecursively(Place currentPlace, int currentPos) {
+		if (currentPos == currentTrace.size()) {
+			if (currentPlace.getName().equals(out.getName())) {
+				kraj = true;
+			}
+			return;
+		}
+		Set<String> outActivities = currentPlace.getOutActivities();
+		for (String activity : outActivities) {
+			if (activity.equals(currentTrace.get(currentPos))) {
+				Set<Place> toGoPlaces = eventToPlaceTransitionsMap
+						.get(activity);
+				for (Place p : toGoPlaces) {
+					executeTraceRecursively(p, currentPos + 1);
+					if (kraj) {
+						return;
+					}
+				}
+			}
+		}
 	}
 }

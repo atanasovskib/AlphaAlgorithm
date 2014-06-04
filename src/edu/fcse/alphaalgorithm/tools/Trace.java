@@ -47,7 +47,7 @@ public class Trace implements Iterable<String>{
 	public int hashCode() {
 		return eventsList.hashCode();
 	}
-	public List<String> getEventsList(){
+	public List<String> getActivitiesList(){
 		return eventsList;
 	}
 	public String getFirstEvent() {
