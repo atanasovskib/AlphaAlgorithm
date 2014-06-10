@@ -39,6 +39,9 @@ public class WorkflowNetCreator {
 	Set<Pair<String, Place>> eventToPlaceTransitions;
 	Map<String, Set<Place>> eventToPlaceTransitionsMap;
 	Set<Pair<Place, String>> placeToEventTransitions;
+	Map<Place, Set<String>> placeToEventTransitionsMap;
+
+	Map<String, Pair<Set<Place>, Set<Place>>> activityPrePostMap;
 	// Source place
 	Place in = new Place("in", new HashSet<String>(), new HashSet<String>());
 
@@ -77,7 +80,29 @@ public class WorkflowNetCreator {
 		createPlaceToEventTransitions();
 		// Step 6
 		connectSourceAndSink();
+		createActivityPrePostMap();
 		System.out.println(prepareWFforPrint());
+	}
+
+	private void createActivityPrePostMap() {
+		activityPrePostMap=new HashMap<>();
+		for(String activity:activityList){
+			Set<Place> first=new HashSet<Place>();
+			Set<Place> second=new HashSet<Place>();
+			activityPrePostMap.put(activity, new Pair<Set<Place>, Set<Place>>(first, second));
+		}
+		for(Place p:workflowPlaces){
+			Set<String> inA=p.getInActivities();
+			for(String activity:inA){
+				Pair<Set<Place>,Set<Place>> pair=activityPrePostMap.get(activity);
+				pair.getSecond().add(p);
+			}
+			Set<String> outA=p.getOutActivities();
+			for(String activity:outA){
+				Pair<Set<Place>,Set<Place>> pair=activityPrePostMap.get(activity);
+				pair.getFirst().add(p);
+			}
+		}
 	}
 
 	/**
@@ -111,10 +136,13 @@ public class WorkflowNetCreator {
 	 */
 	private Set<Place> getPlacesFromFootprint() {
 		Set<Place> xl = new HashSet<>();
+		System.out.println("Getting places from footprint:");
 		Set<Set<String>> powerSet = Utils.powerSet(activityList);
+		System.out.println("Got powerSet: "+powerSet.size());
 		powerSet.remove(new HashSet<>());
 		@SuppressWarnings("unchecked")
 		Set<String>[] array = powerSet.toArray(new Set[] {});
+		System.out.println("Power set cast to array");
 		for (int i = 0; i < array.length; i++) {
 			Set<String> first = array[i];
 			for (int j = 0; j < array.length; j++) {
@@ -127,6 +155,7 @@ public class WorkflowNetCreator {
 				}
 			}
 		}
+		System.out.println("Places (XL) created from footprint. # of places in XL: "+xl.size());
 		return xl;
 	}
 
@@ -170,10 +199,10 @@ public class WorkflowNetCreator {
 
 	public void createEventToPlaceTransitions() {
 		eventToPlaceTransitions = new HashSet<>();
-		eventToPlaceTransitionsMap=new HashMap<>();
+		eventToPlaceTransitionsMap = new HashMap<>();
 		for (String event : activityList) {
-			Set<Place> eventToPlace=new HashSet<>();
-			eventToPlaceTransitionsMap.put(event,eventToPlace);
+			Set<Place> eventToPlace = new HashSet<>();
+			eventToPlaceTransitionsMap.put(event, eventToPlace);
 			for (Place place : this.workflowPlaces) {
 				if (place.getInActivities().contains(event)) {
 					eventToPlaceTransitions.add(new Pair<>(event, place));
@@ -208,6 +237,8 @@ public class WorkflowNetCreator {
 			out.addInEvent(endEvent);
 			eventToPlaceTransitions.add(new Pair<String, Place>(endEvent, out));
 		}
+		workflowPlaces.add(in);
+		workflowPlaces.add(out);
 	}
 
 	private String prepareWFforPrint() {
@@ -268,37 +299,7 @@ public class WorkflowNetCreator {
 		}
 		return singleTrace;
 	}
-/*
-	private Trace pruneOLLSBackup(Trace singleTrace) {
-		if (recordedLLOs == null) {
-			recordedLLOs = new HashSet<>();
-		}
-		Trace newTrace;
-		int start = -1;
-		while ((start = checkForCycleLengthOne(singleTrace)) != -1) {
 
-			newTrace = new Trace();
-			List<String> eventsList = singleTrace.getEventsList();
-			int prev = start - 1;
-			int i = 0;
-			for (; i < start; i++) {
-				newTrace.addEvent(eventsList.get(i));
-			}
-			for (; i < eventsList.size() - 1
-					&& eventsList.get(i).equals(eventsList.get(i + 1)); i++)
-				;
-			i++;
-			LoopLengthOne llo = new LoopLengthOne(eventsList.get(prev),
-					eventsList.get(start), eventsList.get(i));
-			recordedLLOs.add(llo);
-			for (; i < eventsList.size(); i++) {
-				newTrace.addEvent(eventsList.get(i));
-			}
-			singleTrace = newTrace;
-		}
-		return singleTrace;
-	}
-*/
 	private void postProcessWF() {
 		Queue<LoopLengthOne> lloQueue = new LinkedList<>(recordedLLOs);
 		while (!lloQueue.isEmpty()) {
@@ -324,38 +325,53 @@ public class WorkflowNetCreator {
 	}
 
 	public boolean runTrace(Trace trace) {
-		Place current = in;
-		currentTrace = trace.getActivitiesList();
-		kraj = false;
-		executeTraceRecursively(current, 0);
-		return kraj;
-	}
-
-	private List<String> currentTrace;
-	boolean kraj = false;
-
-	private void executeTraceRecursively(Place currentPlace, int currentPos) {
-		//ГРЕШКААА
-		System.err.println("Curr place: "+currentPlace.getName());
-		System.err.println("Next trans: "+currentTrace.get(currentPos));
-		if (currentPos == currentTrace.size()) {
-			if (currentPlace.getName().equals(out.getName())) {
-				kraj = true;
-			}
-			return;
+		for(Place p:workflowPlaces){
+			p.takeToken();
 		}
-		Set<String> outActivities = currentPlace.getOutActivities();
-		for (String activity : outActivities) {
-			if (activity.equals(currentTrace.get(currentPos))) {
-				Set<Place> toGoPlaces = eventToPlaceTransitionsMap
-						.get(activity);
-				for (Place p : toGoPlaces) {
-					executeTraceRecursively(p, currentPos + 1);
-					if (kraj) {
-						return;
-					}
+		List<String> currentTrace = trace.getActivitiesList();
+		in.putToken();
+		for (String currentActivity : currentTrace) {
+			// if out place has a token but trace is not finished
+			if (out.hasToken()) {
+				return false;
+			}
+			Pair<Set<Place>, Set<Place>> actPrePost = activityPrePostMap
+					.get(currentActivity);
+			//activity not found in construction set event log
+			if(actPrePost==null){
+				return false;
+			}
+			Set<Place> inPlaces = actPrePost.getFirst();
+			boolean enabled = true;
+			for (Place p : inPlaces) {
+				if (!p.hasToken()) {
+					enabled = false;
+					break;
+				}
+			}
+			if (enabled) {
+				for (Place p : inPlaces) {
+					p.takeToken();
+				}
+				for (Place p : actPrePost.getSecond()) {
+					p.putToken();
 				}
 			}
 		}
+		if (out.hasToken()) {
+			int numTokens = 0;
+			for (Place p : workflowPlaces) {
+				if (p.hasToken()) {
+					numTokens++;
+				}
+			}
+			if (numTokens != 1) {
+				return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
+
 }

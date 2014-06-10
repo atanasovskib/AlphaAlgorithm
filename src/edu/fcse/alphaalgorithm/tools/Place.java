@@ -12,6 +12,8 @@ public class Place {
 	String name;
 	public static char nameGenerator = 'A';
 
+	private boolean token;
+
 	public Place(Set<String> in, Set<String> out) {
 		activitiesPair = new Pair<>(in, out);
 		name = "" + nameGenerator++;
@@ -75,7 +77,8 @@ public class Place {
 	 */
 	public boolean isSuperPlace(Place potentialSubplace) {
 		if (getInActivities().containsAll(potentialSubplace.getInActivities())) {
-			if (getOutActivities().containsAll(potentialSubplace.getOutActivities())) {
+			if (getOutActivities().containsAll(
+					potentialSubplace.getOutActivities())) {
 				return true;
 			}
 		}
@@ -89,7 +92,20 @@ public class Place {
 	public void addOutEvent(String activityName) {
 		activitiesPair.getSecond().add(activityName);
 	}
-	public String getName(){
+
+	public String getName() {
 		return name;
+	}
+
+	public boolean hasToken() {
+		return token;
+	}
+
+	public void putToken() {
+		token = true;
+	}
+
+	public void takeToken() {
+		token = false;
 	}
 }
