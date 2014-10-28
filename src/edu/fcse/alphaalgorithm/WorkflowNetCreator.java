@@ -21,10 +21,6 @@ import edu.fcse.alphaalgorithm.tools.Trace;
  * @author blagoj atanasovski
  * 
  */
-/**
- * @author blagoj
- * 
- */
 public class WorkflowNetCreator {
 	public static boolean takeInAccountLoopsLengthTwo = true;
 
