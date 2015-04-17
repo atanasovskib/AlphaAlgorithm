@@ -11,3 +11,4 @@ Can do:
   2. Create a WF-net from that Event Log using the Alpha Plus Algorithm
   3. Run traces on the create WF-net
   4. Validate the created WF-net
+  5. Eat candy
