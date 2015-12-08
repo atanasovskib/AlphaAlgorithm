@@ -1,24 +1,17 @@
 package edu.fcse.alphaalgorithm;
 
-import java.io.IOException;
+import edu.fcse.alphaalgorithm.tools.Trace;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import edu.fcse.alphaalgorithm.tools.Trace;
-
-public class AlphaPlusAlgorihtmMain {
+public class AlphaPlusAlgorithmMain {
 	public static void main(String args[]) {
-		// Validate.validateAlgorithmPercentage();
-		// Set<Trace> eventLog = checkArgs(args);
-		Set<Trace> eventLog;
-		try {
-			eventLog = Utils.parseXESFile("reviewing.xes");
-			WorkflowNetCreator.takeInAccountLoopsLengthTwo = true;
-			new WorkflowNetCreator(eventLog);
-		} catch (IOException e) {
-			System.exit(-1);
-			System.err.println("Error reading reviewing.xes");
-		}
+		Validate.validateAlgorithmPercentage();
+		Set<Trace> eventLog = checkArgs(args);
+		//eventLog = Utils.parseXESFile("reviewing.xes");
+		WorkflowNetCreator.takeInAccountLoopsLengthTwo = true;
+		new WorkflowNetCreator(eventLog);
 	}
 
 	private static Set<Trace> checkArgs(String[] args) {

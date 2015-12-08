@@ -26,21 +26,23 @@ public class Utils {
 	 * @return a set of all the subsets of originalSet
 	 */
 	public static <E> Set<Set<E>> powerSet(Set<E> originalSet) {
-		Set<Set<E>> sets = new HashSet<Set<E>>();
+		Set<Set<E>> sets = new HashSet<>();
 		if (originalSet.isEmpty()) {
-			sets.add(new HashSet<E>());
+			sets.add(new HashSet<>());
 			return sets;
 		}
+
 		List<E> list = new ArrayList<>(originalSet);
 		E head = list.get(0);
 		Set<E> rest = new HashSet<>(list.subList(1, list.size()));
 		for (Set<E> set : powerSet(rest)) {
-			Set<E> newSet = new HashSet<E>();
+			Set<E> newSet = new HashSet<>();
 			newSet.add(head);
 			newSet.addAll(set);
 			sets.add(newSet);
 			sets.add(set);
 		}
+
 		return sets;
 	}
 
@@ -49,24 +51,26 @@ public class Utils {
 		Path file = FileSystems.getDefault().getPath(fileName);
 		Set<Trace> toReturn = new HashSet<>();
 		try (BufferedReader reader = Files.newBufferedReader(file, charset)) {
-			String line = null;
+			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] events = line.split(",");
 				if (events == null || events.length == 0) {
 					throw new IOException(
 							"Input file not in correct format, empty line read");
 				}
+
 				toReturn.add(new Trace(events));
 			}
 		} catch (IOException x) {
 			System.err.format("IOException: %s%n", x);
-			return new HashSet<Trace>();
+			return new HashSet<>();
 		}
+
 		return toReturn;
 	}
 
 	public static Set<Trace> demoL1eventLog() {
-		Set<Trace> eventLog = new HashSet<Trace>();
+		Set<Trace> eventLog = new HashSet<>();
 		eventLog.add(new Trace(new String[] { "a", "b", "c", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "c", "b", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "e", "d" }));
@@ -74,7 +78,7 @@ public class Utils {
 	}
 
 	public static Set<Trace> demoL2eventLog() {
-		Set<Trace> eventLog = new HashSet<Trace>();
+		Set<Trace> eventLog = new HashSet<>();
 		eventLog.add(new Trace(new String[] { "a", "b", "c", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "c", "b", "d" }));
 		eventLog.add(new Trace(new String[] { "a", "b", "c", "e", "f", "b",
@@ -89,7 +93,7 @@ public class Utils {
 	}
 
 	public static Set<Trace> demoL7eventLog() {
-		Set<Trace> eventLog = new HashSet<Trace>();
+		Set<Trace> eventLog = new HashSet<>();
 		eventLog.add(new Trace(new String[] { "a", "c" }));
 		eventLog.add(new Trace(new String[] { "a", "b", "c" }));
 		eventLog.add(new Trace(new String[] { "a", "b", "b", "c" }));
@@ -98,7 +102,7 @@ public class Utils {
 	}
 
 	public static Set<Trace> demoLLTeventLog() {
-		Set<Trace> eventLog = new HashSet<Trace>();
+		Set<Trace> eventLog = new HashSet<>();
 		eventLog.add(new Trace(new String[] { "x", "a", "y" }));
 		eventLog.add(new Trace(new String[] { "x", "a", "b", "y" }));
 		eventLog.add(new Trace(new String[] { "x", "w", }));

@@ -1,20 +1,9 @@
 package edu.fcse.alphaalgorithm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import edu.fcse.alphaalgorithm.tools.*;
 
-import edu.fcse.alphaalgorithm.tools.Footprint;
-import edu.fcse.alphaalgorithm.tools.LoopLengthOne;
-import edu.fcse.alphaalgorithm.tools.Pair;
-import edu.fcse.alphaalgorithm.tools.Place;
-import edu.fcse.alphaalgorithm.tools.Trace;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Creates a Workflow Net Model from an eventLog.
@@ -35,28 +24,26 @@ public class WorkflowNetCreator {
 	Set<Pair<String, Place>> eventToPlaceTransitions;
 	Map<String, Set<Place>> eventToPlaceTransitionsMap;
 	Set<Pair<Place, String>> placeToEventTransitions;
-	Map<Place, Set<String>> placeToEventTransitionsMap;
 
 	Map<String, Pair<Set<Place>, Set<Place>>> activityPrePostMap;
 	// Source place
-	Place in = new Place("in", new HashSet<String>(), new HashSet<String>());
+	Place in = new Place("in", new HashSet<>(), new HashSet<>());
 
 	// Sink place
-	Place out = new Place("out", new HashSet<String>(), new HashSet<String>());
+	Place out = new Place("out", new HashSet<>(), new HashSet<>());
 
 	public WorkflowNetCreator(Set<Trace> eventsLog) {
-		Set<Trace> preprocessedEventsLog = new HashSet<>();
-		for (Trace trace : eventsLog) {
-			preprocessedEventsLog.add(preprocessOLLs(trace));
-		}
-		this.eventsLog = preprocessedEventsLog;
+		Set<Trace> preprocessedEventsLog = eventsLog.stream().map(this::preprocessOLLs).collect(Collectors.toSet());
+        this.eventsLog = preprocessedEventsLog;
 		this.activityList = new HashSet<>();
 		this.startingActivities = new HashSet<>();
 		this.endingActivities = new HashSet<>();
+
 		// ProcessMining book page 133
 		// Steps 1,2,3
 		extractActivities(eventsLog, this.activityList,
 				this.startingActivities, this.endingActivities);
+
 		// Generate footprint matrix from eventsLog
 		footprint = new Footprint(activityList, eventsLog,
 				takeInAccountLoopsLengthTwo);
@@ -64,16 +51,21 @@ public class WorkflowNetCreator {
 		System.out.println("Footprint matrix:");
 		System.out.println(footprint);
 		System.out.println("------------------------");
+
 		// Step 4 generate places
 		Set<Place> XL = getPlacesFromFootprint();
+
 		// Step 5 reduce places, no places that are subsets of other places
 		Set<Place> YL = reducePlaces(XL);
+
 		// all the places except start and sink
 		workflowPlaces = YL;
 		postProcessWF();
+
 		// Step 7 create transitions
 		createEventToPlaceTransitions();
 		createPlaceToEventTransitions();
+
 		// Step 6
 		connectSourceAndSink();
 		createActivityPrePostMap();
@@ -83,16 +75,18 @@ public class WorkflowNetCreator {
 	private void createActivityPrePostMap() {
 		activityPrePostMap=new HashMap<>();
 		for(String activity:activityList){
-			Set<Place> first=new HashSet<Place>();
-			Set<Place> second=new HashSet<Place>();
-			activityPrePostMap.put(activity, new Pair<Set<Place>, Set<Place>>(first, second));
+			Set<Place> first=new HashSet<>();
+			Set<Place> second=new HashSet<>();
+			activityPrePostMap.put(activity, new Pair<>(first, second));
 		}
+
 		for(Place p:workflowPlaces){
 			Set<String> inA=p.getInActivities();
 			for(String activity:inA){
 				Pair<Set<Place>,Set<Place>> pair=activityPrePostMap.get(activity);
 				pair.getSecond().add(p);
 			}
+
 			Set<String> outA=p.getOutActivities();
 			for(String activity:outA){
 				Pair<Set<Place>,Set<Place>> pair=activityPrePostMap.get(activity);
@@ -145,18 +139,20 @@ public class WorkflowNetCreator {
 				if (i == j) {
 					continue;
 				}
+
 				Set<String> second = array[j];
 				if (footprint.areEventsConnected(first, second)) {
 					xl.add(new Place(first, second));
 				}
 			}
 		}
+
 		System.out.println("Places (XL) created from footprint. # of places in XL: "+xl.size());
 		return xl;
 	}
 
 	/**
-	 * @param Xl
+	 * @param xl
 	 *            the result from step 4 of the algorithm
 	 * @return Yl the result from step 5 of the algorithm, all subset Places
 	 *         removed from Xl
@@ -175,6 +171,7 @@ public class WorkflowNetCreator {
 						continue;
 					}
 				}
+
 				if (potentialPlaces[j].getInActivities().containsAll(
 						potentialPlaces[i].getInActivities())) {
 					if (potentialPlaces[j].getOutActivities().containsAll(
@@ -184,6 +181,7 @@ public class WorkflowNetCreator {
 				}
 			}
 		}
+
 		Set<Place> yl = new HashSet<>(xl);
 		yl.removeAll(toRemove);
 		return yl;
@@ -211,11 +209,12 @@ public class WorkflowNetCreator {
 	private void createPlaceToEventTransitions() {
 		placeToEventTransitions = new HashSet<>();
 		for (String event : activityList) {
-			for (Place place : this.workflowPlaces) {
-				if (place.getOutActivities().contains(event)) {
-					placeToEventTransitions.add(new Pair<>(place, event));
-				}
-			}
+            placeToEventTransitions.addAll(
+                    this.workflowPlaces.stream()
+                            .filter(place -> place.getOutActivities().contains(event))
+                            .map(place -> new Pair<>(place, event))
+                            .collect(Collectors.toList())
+            );
 		}
 	}
 
@@ -227,12 +226,14 @@ public class WorkflowNetCreator {
 		for (String startEvent : startingActivities) {
 			in.addOutEvent(startEvent);
 			placeToEventTransitions
-					.add(new Pair<Place, String>(in, startEvent));
+					.add(new Pair<>(in, startEvent));
 		}
+
 		for (String endEvent : endingActivities) {
 			out.addInEvent(endEvent);
-			eventToPlaceTransitions.add(new Pair<String, Place>(endEvent, out));
+			eventToPlaceTransitions.add(new Pair<>(endEvent, out));
 		}
+
 		workflowPlaces.add(in);
 		workflowPlaces.add(out);
 	}
@@ -247,11 +248,13 @@ public class WorkflowNetCreator {
 		for (String event : activityList) {
 			sb.append(event + ", ");
 		}
+
 		sb.append("\nPlaces:\n");
 		sb.append(in).append("\n");
 		for (Place place : workflowPlaces) {
 			sb.append(place).append("\n");
 		}
+
 		sb.append(out);
 		sb.append("\n");
 		sb.append("Transitions:\n");
@@ -259,10 +262,12 @@ public class WorkflowNetCreator {
 			sb.append(String.format("From place (%s) to event [%s]\n",
 					transition.getFirst(), transition.getSecond()));
 		}
+
 		for (Pair<String, Place> transition : eventToPlaceTransitions) {
 			sb.append(String.format("From event [%s] to place (%s)\n",
 					transition.getFirst(), transition.getSecond()));
 		}
+
 		return sb.toString();
 	}
 
@@ -273,6 +278,7 @@ public class WorkflowNetCreator {
 				return i;
 			}
 		}
+
 		return -1;
 	}
 
@@ -280,19 +286,20 @@ public class WorkflowNetCreator {
 		if (recordedLLOs == null) {
 			recordedLLOs = new HashSet<>();
 		}
+
 		int start = -1;
 		if ((start = checkForCycleLengthOne(singleTrace)) != -1) {
 			List<String> eventsList = singleTrace.getActivitiesList();
 			int prev = start - 1;
 			int i = start;
 			for (; i < eventsList.size() - 1
-					&& eventsList.get(i).equals(eventsList.get(i + 1)); i++)
-				;
+					&& eventsList.get(i).equals(eventsList.get(i + 1)); i++);
 			i++;
 			LoopLengthOne llo = new LoopLengthOne(eventsList.get(prev),
 					eventsList.get(start), eventsList.get(i));
 			recordedLLOs.add(llo);
 		}
+
 		return singleTrace;
 	}
 
@@ -321,9 +328,7 @@ public class WorkflowNetCreator {
 	}
 
 	public boolean runTrace(Trace trace) {
-		for(Place p:workflowPlaces){
-			p.takeToken();
-		}
+        workflowPlaces.forEach(Place::takeToken);
 		List<String> currentTrace = trace.getActivitiesList();
 		in.putToken();
 		for (String currentActivity : currentTrace) {
@@ -345,15 +350,13 @@ public class WorkflowNetCreator {
 					break;
 				}
 			}
+
 			if (enabled) {
-				for (Place p : inPlaces) {
-					p.takeToken();
-				}
-				for (Place p : actPrePost.getSecond()) {
-					p.putToken();
-				}
+                inPlaces.forEach(Place::takeToken);
+                actPrePost.getSecond().forEach(Place::putToken);
 			}
 		}
+
 		if (out.hasToken()) {
 			int numTokens = 0;
 			for (Place p : workflowPlaces) {
@@ -361,9 +364,11 @@ public class WorkflowNetCreator {
 					numTokens++;
 				}
 			}
+
 			if (numTokens != 1) {
 				return false;
 			}
+
 			return true;
 		} else {
 			return false;
