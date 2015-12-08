@@ -25,6 +25,7 @@ public class Footprint {
 		for (String name : eventNames) {
 			eventNameToMatrixIndex.put(name, index++);
 		}
+
 		int numberOfEvents = eventNames.size();
 		// In the beginning there were no connections
 		footprint = new RelationType[numberOfEvents][numberOfEvents];
@@ -33,6 +34,7 @@ public class Footprint {
 				footprint[i][j] = RelationType.NOT_CONNECTED;
 			}
 		}
+
 		// And then God said, let there be a Trace
 		for (Trace singleTrace : eventLog) {
 			List<String> eventsList = singleTrace.getActivitiesList();
@@ -54,10 +56,12 @@ public class Footprint {
 					footprint[currentEventNumber][nextEventNumber] = RelationType.PARALLEL;
 					footprint[nextEventNumber][currentEventNumber] = RelationType.PARALLEL;
 				}
+
 				// if some of the other relation types are at this position,
 				// they are not changed
 			}
 		}
+
 		if (lookForLLTs) {
 			for (Trace singleTrace : eventLog) {
 				List<String> eventsList = singleTrace.getActivitiesList();
@@ -117,6 +121,7 @@ public class Footprint {
 				}
 			}
 		}
+
 		// For every b1, b2 in B => b1#b2
 		String[] arraySecond = outputEvents.toArray(new String[] {});
 		for (int i = 0; i < arraySecond.length - 1; i++) {
@@ -126,6 +131,7 @@ public class Footprint {
 				}
 			}
 		}
+
 		// For every a in A and b in B => a > b in f
 		for (int i = 0; i < arrayFirst.length; i++) {
 			for (int j = 0; j < arraySecond.length; j++) {
@@ -134,28 +140,33 @@ public class Footprint {
 				}
 			}
 		}
+
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		String toReturn = "  ";
+		StringBuilder toReturn = new StringBuilder("  ");
 		String[] tmp = new String[footprint.length];
 		for (String key : eventNameToMatrixIndex.keySet()) {
 			tmp[eventNameToMatrixIndex.get(key)] = key;
 		}
+
 		for (int i = 0; i < footprint.length; i++) {
-			toReturn += tmp[i] + " ";
+			toReturn.append(tmp[i]).append(' ');
 		}
-		toReturn += "\n";
+
+		toReturn.append('\n');
 		for (int i = 0; i < footprint.length; i++) {
-			toReturn += tmp[i] + " ";
+			toReturn.append(tmp[i]).append(' ');
 			for (int j = 0; j < footprint.length; j++) {
-				toReturn += footprint[i][j].symbol() + " ";
+				toReturn.append(footprint[i][j].symbol()).append(' ');
 			}
-			toReturn += "\n";
+
+			toReturn.append('\n');
 		}
-		return toReturn;
+
+		return toReturn.toString();
 	}
 
 }
