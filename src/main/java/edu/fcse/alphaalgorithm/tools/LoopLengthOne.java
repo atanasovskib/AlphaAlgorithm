@@ -1,45 +1,45 @@
 package edu.fcse.alphaalgorithm.tools;
 
 public class LoopLengthOne {
-    String prevAction;
-    String loopedAction;
-    String nextAction;
+    Event prevEvent;
+    Event loopedEvent;
+    Event nextEvent;
 
-    public LoopLengthOne(String prevAction, String loopedAction,
-                         String nextAction) {
-        this.prevAction = prevAction;
-        this.loopedAction = loopedAction;
-        this.nextAction = nextAction;
+    public LoopLengthOne(Event prevEvent, Event loopedEvent,
+                         Event nextEvent) {
+        this.prevEvent = prevEvent;
+        this.loopedEvent = loopedEvent;
+        this.nextEvent = nextEvent;
     }
 
-    public String getPrevAction() {
-        return prevAction;
+    public Event getPrevEvent() {
+        return prevEvent;
     }
 
-    public void setPrevAction(String prevAction) {
-        this.prevAction = prevAction;
+    public void setPrevEvent(Event prevEvent) {
+        this.prevEvent = prevEvent;
     }
 
-    public String getLoopedAction() {
-        return loopedAction;
+    public Event getLoopedEvent() {
+        return loopedEvent;
     }
 
-    public void setLoopedAction(String loopedAction) {
-        this.loopedAction = loopedAction;
+    public void setLoopedEvent(Event loopedEvent) {
+        this.loopedEvent = loopedEvent;
     }
 
-    public String getNextAction() {
-        return nextAction;
+    public Event getNextEvent() {
+        return nextEvent;
     }
 
-    public void setNextAction(String nextAction) {
-        this.nextAction = nextAction;
+    public void setNextEvent(Event nextEvent) {
+        this.nextEvent = nextEvent;
     }
 
     @Override
     public String toString() {
-        return "LLO [prev=" + prevAction + ", looped="
-                + loopedAction + ", next=" + nextAction + "]";
+        return "LoopLengthOne [prev=" + prevEvent + ", looped="
+                + loopedEvent + ", next=" + nextEvent + "]";
     }
 
 }

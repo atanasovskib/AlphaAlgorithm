@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class Place {
     // (Input Activities, Output Activities)
-    Pair<Set<String>, Set<String>> activitiesPair;
+    Pair<Set<Event>, Set<Event>> eventsPair;
     /**
      * The name of the place is merely symbolic, plays no part in the
      * identification of the Place. See {@link #equals(Object)}
@@ -14,27 +14,27 @@ public class Place {
 
     private boolean token;
 
-    public Place(Set<String> in, Set<String> out) {
-        activitiesPair = new Pair<>(in, out);
+    public Place(Set<Event> in, Set<Event> out) {
+        eventsPair = new Pair<>(in, out);
         name = "" + nameGenerator++;
     }
 
-    public Place(String name, Set<String> in, Set<String> out) {
-        activitiesPair = new Pair<>(in, out);
+    public Place(String name, Set<Event> in, Set<Event> out) {
+        eventsPair = new Pair<>(in, out);
         this.name = name;
     }
 
-    public Set<String> getInActivities() {
-        return activitiesPair.getFirst();
+    public Set<Event> getInEvents() {
+        return eventsPair.getFirst();
     }
 
-    public Set<String> getOutActivities() {
-        return activitiesPair.getSecond();
+    public Set<Event> getOutEvents() {
+        return eventsPair.getSecond();
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s", name, activitiesPair);
+        return String.format("%s: %s", name, eventsPair);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Place {
         final int prime = 31;
         int result = 1;
         result = prime * result
-                + ((activitiesPair == null) ? 0 : activitiesPair.hashCode());
+                + ((eventsPair == null) ? 0 : eventsPair.hashCode());
         return result;
     }
 
@@ -55,10 +55,10 @@ public class Place {
         if (getClass() != obj.getClass())
             return false;
         Place other = (Place) obj;
-        if (activitiesPair == null) {
-            if (other.activitiesPair != null)
+        if (eventsPair == null) {
+            if (other.eventsPair != null)
                 return false;
-        } else if (!activitiesPair.equals(other.activitiesPair))
+        } else if (!eventsPair.equals(other.eventsPair))
             return false;
         return true;
     }
@@ -70,26 +70,26 @@ public class Place {
      * is a superplace of Place B with input {a} and output {b} => Place B can
      * be discarded.
      *
-     * @param potentialSubplace
-     * @return true if potentialSubplace.inEvents ⊆ this.inEvents &&
-     * potentialSubplace.outEvents ⊆ this.outEvents
+     * @param potentialSubPlace
+     * @return true if potentialSubPlace.inEvents ⊆ this.inEvents &&
+     * potentialSubPlace.outEvents ⊆ this.outEvents
      */
-    public boolean isSuperPlace(Place potentialSubplace) {
-        if (getInActivities().containsAll(potentialSubplace.getInActivities())) {
-            if (getOutActivities().containsAll(
-                    potentialSubplace.getOutActivities())) {
+    public boolean isSuperPlace(Place potentialSubPlace) {
+        if (getInEvents().containsAll(potentialSubPlace.getInEvents())) {
+            if (getOutEvents().containsAll(
+                    potentialSubPlace.getOutEvents())) {
                 return true;
             }
         }
         return false;
     }
 
-    public void addInEvent(String activityName) {
-        activitiesPair.getFirst().add(activityName);
+    public void addInEvent(Event event) {
+        eventsPair.getFirst().add(event);
     }
 
-    public void addOutEvent(String activityName) {
-        activitiesPair.getSecond().add(activityName);
+    public void addOutEvent(Event eventName) {
+        eventsPair.getSecond().add(eventName);
     }
 
     public String getName() {

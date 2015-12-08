@@ -11,8 +11,8 @@ import java.util.List;
  *
  * @author blagoj atanasovski
  */
-public class Trace implements Iterable<String> {
-    private List<String> eventsList;
+public class Trace implements Iterable<Event> {
+    private List<Event> eventsList;
 
     public Trace() {
         eventsList = new LinkedList<>();
@@ -21,20 +21,20 @@ public class Trace implements Iterable<String> {
     public Trace(String[] eventsArray) {
         eventsList = new ArrayList<>(eventsArray.length);
         for (String event : eventsArray) {
-            eventsList.add(event);
+            eventsList.add(new Event(event));
         }
     }
 
-    public Trace(Collection<String> events) {
+    public Trace(Collection<Event> events) {
         eventsList = new ArrayList<>(events);
     }
 
-    public void addEvent(String eventName) {
-        eventsList.add(eventName);
+    public void addEvent(Event event) {
+        eventsList.add(event);
     }
 
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<Event> iterator() {
         return eventsList.iterator();
     }
 
@@ -52,15 +52,15 @@ public class Trace implements Iterable<String> {
         return eventsList.hashCode();
     }
 
-    public List<String> getActivitiesList() {
+    public List<Event> getEventsList() {
         return eventsList;
     }
 
-    public String getFirstEvent() {
+    public Event getFirstEvent() {
         return eventsList.get(0);
     }
 
-    public String getLastEvent() {
+    public Event getLastEvent() {
         return eventsList.get(eventsList.size() - 1);
     }
 
