@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Trace implements Iterable<String> {
     private List<String> eventsList;
-    
+
     public Trace() {
         eventsList = new LinkedList<>();
     }
