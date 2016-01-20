@@ -1,9 +1,6 @@
 package edu.fcse.alphaalgorithm.tools;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A wrapper for the footprint matrix of an event log. Relations between events
@@ -18,7 +15,7 @@ public class Footprint {
     Map<String, Integer> eventNameToMatrixIndex = new HashMap<>();
 
     public Footprint(Set<Event> allEvents, Set<Trace> eventLog,
-                     boolean lookForLLTs) {
+                     boolean lookForLoopsOfLengthTwo) {
         int index = 0;
         // assign each of the events an index in the matrix
         for (Event event : allEvents) {
@@ -28,10 +25,8 @@ public class Footprint {
         int numberOfEvents = allEvents.size();
         // In the beginning there were no connections
         footprint = new RelationType[numberOfEvents][numberOfEvents];
-        for (int i = 0; i < numberOfEvents; i++) {
-            for (int j = 0; j < numberOfEvents; j++) {
-                footprint[i][j] = RelationType.NOT_CONNECTED;
-            }
+        for(RelationType[] row: footprint){
+            Arrays.fill(row,RelationType.NOT_CONNECTED);
         }
 
         // And then God said, let there be a Trace
@@ -61,7 +56,7 @@ public class Footprint {
             }
         }
 
-        if (lookForLLTs) {
+        if (lookForLoopsOfLengthTwo) {
             for (Trace singleTrace : eventLog) {
                 List<Event> eventsList = singleTrace.getEventsList();
                 for (int i = 0; i < eventsList.size() - 2; i++) {

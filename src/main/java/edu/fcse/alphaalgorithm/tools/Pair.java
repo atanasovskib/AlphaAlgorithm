@@ -37,6 +37,7 @@ public class Pair<E, T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
+
         Pair<E, T> other = (Pair<E, T>) obj;
         if (first == null) {
             if (other.first != null)

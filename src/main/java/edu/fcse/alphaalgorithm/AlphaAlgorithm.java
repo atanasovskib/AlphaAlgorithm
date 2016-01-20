@@ -10,35 +10,22 @@ import java.util.stream.Collectors;
  *
  * @author blagoj atanasovski
  */
-public class WorkflowNetCreator {
+public class AlphaAlgorithm {
     public static boolean takeInAccountLoopsLengthTwo = true;
 
-    Set<Place> workflowPlaces;// Pl
-    Set<Pair<Event, Place>> eventToPlaceTransitions;
-    Map<Event, Set<Place>> eventToPlaceTransitionsMap;
-    Set<Pair<Place, Event>> placeToEventTransitions;
-
-    Map<Event, Pair<Set<Place>, Set<Place>>> eventPrePostMap;
-
-    // Source place
-    Place in = new Place("in", new HashSet<>(), new HashSet<>());
-
-    // Sink place
-    Place out = new Place("out", new HashSet<>(), new HashSet<>());
-
-    public WorkflowNetCreator(Set<Trace> eventsLogArg) {
+    public static WorkflowNetwork discoverWorkflowNetwork(Set<Trace> eventsLogArg) {
         Set<LoopLengthOne> recordedLLOs = new HashSet<>();
         for (Trace trace : eventsLogArg) {
-            preProcessOLLs(trace, recordedLLOs);
+            preProcessLLOs(trace, recordedLLOs);
         }
 
-        HashSet<Event> eventList = new HashSet<>();
+        Set<Event> eventList = new HashSet<>();
         HashSet<Event> startingEvents = new HashSet<>();
         HashSet<Event> endingEvents = new HashSet<>();
 
         // ProcessMining book page 133
         // Steps 1,2,3
-        WorkflowNetCreator.extractEvents(eventsLogArg, eventList,
+        AlphaAlgorithm.extractEvents(eventsLogArg, eventList,
                 startingEvents, endingEvents);
 
         // Generate footprint matrix from eventsLog
@@ -50,45 +37,30 @@ public class WorkflowNetCreator {
         System.out.println("------------------------");
 
         // Step 4 generate places
-        Set<Place> XL = WorkflowNetCreator.getPlacesFromFootprint(footprint, eventList);
+        Set<Place> XL = AlphaAlgorithm.getPlacesFromFootprint(footprint, eventList);
 
         // Step 5 reduce places, no places that are subsets of other places
         // workflowPlaces = YL = all the places except start and sink
-        this.workflowPlaces = WorkflowNetCreator.reducePlaces(XL);
-        postProcessWF(recordedLLOs, this.workflowPlaces, eventList);
+        Set<Place> workflowPlaces = AlphaAlgorithm.reducePlaces(XL); //PL
+        AlphaAlgorithm.postProcessWF(recordedLLOs, workflowPlaces, eventList);
 
         // Step 7 create transitions
-        createEventToPlaceTransitions(eventList);
-        createPlaceToEventTransitions(eventList);
+        Set<Pair<Event, Place>> eventToPlaceTransitions = new HashSet<>();
+        Map<Event, Set<Place>> eventToPlaceTransitionsMap = new HashMap<>();
+        Set<Pair<Place, Event>> placeToEventTransitions = new HashSet<>();
+        AlphaAlgorithm.createEventToPlaceTransitions(eventList, workflowPlaces, eventToPlaceTransitions, eventToPlaceTransitionsMap);
+        AlphaAlgorithm.createPlaceToEventTransitions(eventList, workflowPlaces, placeToEventTransitions);
 
         // Step 6
-        connectSourceAndSink(startingEvents, endingEvents);
-        createActivityPrePostMap(eventList);
-        System.out.println(prepareWFForPrint(eventList));
+        // Source and sink place
+        Place in = new Place("in", new HashSet<>(), new HashSet<>());
+        Place out = new Place("out", new HashSet<>(), new HashSet<>());
+        AlphaAlgorithm.connectSourceAndSink(in, out, startingEvents, endingEvents, workflowPlaces, placeToEventTransitions, eventToPlaceTransitions);
+        WorkflowNetwork network = new WorkflowNetwork(workflowPlaces, eventList, eventToPlaceTransitions, eventToPlaceTransitionsMap, placeToEventTransitions, in, out);
+        System.out.println(network);
+        return network;
     }
 
-    private void createActivityPrePostMap(Set<Event> eventList) {
-        this.eventPrePostMap = new HashMap<>();
-        for (Event event : eventList) {
-            Set<Place> first = new HashSet<>();
-            Set<Place> second = new HashSet<>();
-            eventPrePostMap.put(event, new Pair<>(first, second));
-        }
-
-        for (Place p : workflowPlaces) {
-            Set<Event> inA = p.getInEvents();
-            for (Event event : inA) {
-                Pair<Set<Place>, Set<Place>> pair = eventPrePostMap.get(event);
-                pair.getSecond().add(p);
-            }
-
-            Set<Event> outA = p.getOutEvents();
-            for (Event activity : outA) {
-                Pair<Set<Place>, Set<Place>> pair = eventPrePostMap.get(activity);
-                pair.getFirst().add(p);
-            }
-        }
-    }
 
     /**
      * @param eventLog       a set of traces from where the event names are extracted
@@ -121,16 +93,16 @@ public class WorkflowNetCreator {
         System.out.println("Got powerSet: " + powerSet.size());
         powerSet.remove(new HashSet<Event>());
         @SuppressWarnings("unchecked")
-        Set<Event>[] array = powerSet.toArray(new Set[powerSet.size()]);
+        Set<Event>[] powerSetArray = powerSet.toArray(new Set[powerSet.size()]);
         System.out.println("Power set cast to array");
-        for (int i = 0; i < array.length; i++) {
-            Set<Event> first = array[i];
-            for (int j = 0; j < array.length; j++) {
+        for (int i = 0; i < powerSetArray.length; i++) {
+            Set<Event> first = powerSetArray[i];
+            for (int j = 0; j < powerSetArray.length; j++) {
                 if (i == j) {
                     continue;
                 }
 
-                Set<Event> second = array[j];
+                Set<Event> second = powerSetArray[j];
                 if (footprint.areEventsConnected(first, second)) {
                     xl.add(new Place(first, second));
                 }
@@ -176,17 +148,16 @@ public class WorkflowNetCreator {
         return yl;
     }
 
-    public Set<Place> getWorkflowPlaces() {
-        return workflowPlaces;
-    }
-
-    public void createEventToPlaceTransitions(Set<Event> eventList) {
-        eventToPlaceTransitions = new HashSet<>();
-        eventToPlaceTransitionsMap = new HashMap<>();
+    private static void createEventToPlaceTransitions(final Set<Event> eventList,
+                                                      final Set<Place> workflowPlaces,
+                                                      final Set<Pair<Event, Place>> eventToPlaceTransitions,
+                                                      final Map<Event, Set<Place>> eventToPlaceTransitionsMap) {
+        eventToPlaceTransitions.clear();
+        eventToPlaceTransitionsMap.clear();
         for (Event event : eventList) {
             Set<Place> eventToPlace = new HashSet<>();
             eventToPlaceTransitionsMap.put(event, eventToPlace);
-            this.workflowPlaces.stream()
+            workflowPlaces.stream()
                     .filter(place -> place.getInEvents().contains(event))
                     .forEach(place -> {
                         eventToPlaceTransitions.add(new Pair<>(event, place));
@@ -195,11 +166,13 @@ public class WorkflowNetCreator {
         }
     }
 
-    private void createPlaceToEventTransitions(Set<Event> eventList) {
-        placeToEventTransitions = new HashSet<>();
+    private static void createPlaceToEventTransitions(final Set<Event> eventList,
+                                                      final Set<Place> workflowPlaces,
+                                                      final Set<Pair<Place, Event>> placeToEventTransitions) {
+        placeToEventTransitions.clear();
         for (Event event : eventList) {
             placeToEventTransitions.addAll(
-                    this.workflowPlaces.stream()
+                    workflowPlaces.stream()
                             .filter(place -> place.getOutEvents().contains(event))
                             .map(place -> new Pair<>(place, event))
                             .collect(Collectors.toList())
@@ -211,7 +184,13 @@ public class WorkflowNetCreator {
      * Source and Sink places are not connected after the transitions are
      * created between the other events.
      */
-    private void connectSourceAndSink(Set<Event> startingEvents, Set<Event> endingEvents) {
+    private static void connectSourceAndSink(final Place in,
+                                             final Place out,
+                                             final Set<Event> startingEvents,
+                                             final Set<Event> endingEvents,
+                                             final Set<Place> workflowPlaces,
+                                             final Set<Pair<Place, Event>> placeToEventTransitions,
+                                             final Set<Pair<Event, Place>> eventToPlaceTransitions) {
         for (Event startEvent : startingEvents) {
             in.addOutEvent(startEvent);
             placeToEventTransitions
@@ -227,38 +206,6 @@ public class WorkflowNetCreator {
         workflowPlaces.add(out);
     }
 
-    private String prepareWFForPrint(Set<Event> eventList) {
-        StringBuilder sb = new StringBuilder(
-                40
-                        * (placeToEventTransitions.size() + eventToPlaceTransitions
-                        .size()) + eventList.size() + 15
-                        * workflowPlaces.size());
-        sb.append("Events:\n");
-        for (Event event : eventList) {
-            sb.append(event).append(", ");
-        }
-
-        sb.append("\nPlaces:\n");
-        sb.append(in).append("\n");
-        for (Place place : workflowPlaces) {
-            sb.append(place).append("\n");
-        }
-
-        sb.append(out);
-        sb.append("\n");
-        sb.append("Transitions:\n");
-        for (Pair<Place, Event> transition : placeToEventTransitions) {
-            sb.append(String.format("From place (%s) to event [%s]\n",
-                    transition.getFirst(), transition.getSecond()));
-        }
-
-        for (Pair<Event, Place> transition : eventToPlaceTransitions) {
-            sb.append(String.format("From event [%s] to place (%s)\n",
-                    transition.getFirst(), transition.getSecond()));
-        }
-
-        return sb.toString();
-    }
 
     private static int checkForCycleLengthOne(List<Event> eventsInTrace) {
         for (int i = 0; i < eventsInTrace.size() - 1; i++) {
@@ -271,7 +218,7 @@ public class WorkflowNetCreator {
     }
 
     //TODO test this
-    private void preProcessOLLs(Trace singleTrace, Set<LoopLengthOne> recordedLLOs) {
+    private static void preProcessLLOs(Trace singleTrace, Set<LoopLengthOne> recordedLLOs) {
         int start;
         List<Event> eventsInTrace = singleTrace.getEventsList();
         while ((start = checkForCycleLengthOne(eventsInTrace)) != -1) {
@@ -319,46 +266,4 @@ public class WorkflowNetCreator {
             }
         }
     }
-
-    public boolean runTrace(Trace trace) {
-        workflowPlaces.forEach(Place::takeToken);
-        List<Event> currentTrace = trace.getEventsList();
-        in.putToken();
-        for (Event currentActivity : currentTrace) {
-            // if out place has a token but trace is not finished
-            if (out.hasToken()) {
-                return false;
-            }
-
-            Pair<Set<Place>, Set<Place>> actPrePost = eventPrePostMap
-                    .get(currentActivity);
-
-            //activity not found in construction set event log
-            if (actPrePost == null) {
-                return false;
-            }
-
-            Set<Place> inPlaces = actPrePost.getFirst();
-            boolean enabled = true;
-            for (Place p : inPlaces) {
-                if (!p.hasToken()) {
-                    enabled = false;
-                    break;
-                }
-            }
-
-            if (enabled) {
-                inPlaces.forEach(Place::takeToken);
-                actPrePost.getSecond().forEach(Place::putToken);
-            }
-        }
-
-        if (out.hasToken()) {
-            long numTokens = workflowPlaces.stream().filter(place -> place.hasToken()).count();
-            return numTokens == 1;
-        } else {
-            return false;
-        }
-    }
-
 }

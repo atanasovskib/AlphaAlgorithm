@@ -107,4 +107,6 @@ public class Place {
     public void takeToken() {
         token = false;
     }
+
+    public void clearToken(){ token = false;}
 }

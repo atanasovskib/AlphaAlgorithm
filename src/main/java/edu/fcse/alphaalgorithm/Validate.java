@@ -154,11 +154,12 @@ public class Validate {
 		for (int percent = 80; percent <= 95; percent += 5f) {
 			System.out.println(percent);
 			constructionSet.clear();
-			int ammount = (int) (Float.parseFloat("" + percent) / 100.0 * TOTAL_CASES);
-			for (int i = 0; i < rangeMapper.length && ammount >= rangeMapper[i]; i++) {
+			int amount = (int) (Float.parseFloat("" + percent) / 100.0 * TOTAL_CASES);
+			for (int i = 0; i < rangeMapper.length && amount >= rangeMapper[i]; i++) {
 				constructionSet.add(logMap.get(i));
 			}
-			WorkflowNetCreator wfNet = new WorkflowNetCreator(constructionSet);
+
+			WorkflowNetwork wfNet = AlphaAlgorithm.discoverWorkflowNetwork(constructionSet);
 			System.out.println("Construction set count: "
 					+ constructionSet.size());
 			int failedTraces = 0;
@@ -188,7 +189,7 @@ public class Validate {
 				}
 				constructionSet.addAll(folds[j]);
 			}
-			WorkflowNetCreator wfC = new WorkflowNetCreator(constructionSet);
+			WorkflowNetwork wfC =  AlphaAlgorithm.discoverWorkflowNetwork(constructionSet);
 			Place.nameGenerator = 'A';
 			boolean passes = true;
 			System.out.println("Fold: " + i);
