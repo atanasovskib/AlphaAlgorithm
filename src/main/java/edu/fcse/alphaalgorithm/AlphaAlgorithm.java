@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
  * @author blagoj atanasovski
  */
 public class AlphaAlgorithm {
+    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AlphaAlgorithm.class);
     public static boolean takeInAccountLoopsLengthTwo = true;
 
     public static WorkflowNetwork discoverWorkflowNetwork(Set<Trace> eventsLogArg) {

@@ -136,9 +136,11 @@ public class Validate {
 				while (k < rangeMapper.length && index >= rangeMapper[k]) {
 					k++;
 				}
+
 				folds[i].add(logMap.get(k));
 			}
 		}
+
 		return folds;
 	}
 
@@ -150,6 +152,7 @@ public class Validate {
 			validationSet.add(logMap.get(key));
 			tmpMapa.put(logMap.get(key), amountMapper[key]);
 		}
+
 		Set<Trace> constructionSet = new HashSet<>();
 		for (int percent = 80; percent <= 95; percent += 5f) {
 			System.out.println(percent);
@@ -172,6 +175,7 @@ public class Validate {
 					failedCases+=tmpMapa.get(t);
 				}
 			}
+
 			System.out.println("Failed validation traces: " + failedTraces);
 			System.out.println("Failed validation cases: "+failedCases);
 		}
@@ -189,6 +193,7 @@ public class Validate {
 				}
 				constructionSet.addAll(folds[j]);
 			}
+
 			WorkflowNetwork wfC =  AlphaAlgorithm.discoverWorkflowNetwork(constructionSet);
 			Place.nameGenerator = 'A';
 			boolean passes = true;
@@ -203,8 +208,8 @@ public class Validate {
 					fails++;
 				}
 			}
-			System.out.println("Failed validation traces: " + fails);
 
+			System.out.println("Failed validation traces: " + fails);
 		}
 	}
 }
